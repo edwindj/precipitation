@@ -22,7 +22,7 @@ DOWNLOADDATA <- FALSE
 if (DOWNLOADDATA){
   data.url <- "ftp://rsd.gsfc.nasa.gov/pub/912/bolvin/GPCP_ASCII/"
   require(RCurl)
-  dir.create("data/NASA", recursive=TRU)
+  dir.create("data/NASA", recursive=TRUE)
   for (f in files){
     content <- getBinaryURL(paste(data.url, f, sep=""))
     writeBin(content, paste("data/NASA/", f, sep=""))
