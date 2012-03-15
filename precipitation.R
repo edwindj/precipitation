@@ -13,10 +13,12 @@ days <- matrix( diff(seq(as.Date("1979-01-01"), as.Date("2011-01-01"), by = "mon
               , dimnames=list(months, years)
               )
 
+frac <- days / rep(colSums(days), each=12)
+
 # create list of files for yearmonth
 files <- paste("gpcp_", m, ".ascii.gz", sep="")
 
-DOWNLOADDATA <- readline("Download precipitation data from internet? (y/n) ")
+DOWNLOADDATA <- readline("Download precipitation data from internet (y/n) ? : ")
 
 # download data
 if (DOWNLOADDATA=="y"){
@@ -47,17 +49,32 @@ for (i in seq_along(files)){
   cat("Writing ", files.africa[i], "...[",i,"/",length(files),"]\n")
 }
 
-africa <- brick(stack(files.africa))
-writeRaster(africa, "africa.grd")
+africa <- brick(stack(files.africa), filename="data/africa.grd", overwrite=TRUE)
+africa.u <- mapply(unstack(africa),frac, FUN=`*`)
+africa.m <- brick(stack(africa.u), filename="data/africa.m.grd", overwrite=TRUE)
 
 # data per grid cell per year
-africa_year <- stackApply( africa, indices=col(m), filename="africa_year.grd", overwrite=TRUE
-                         , fun = function(x, na.rm, ...) {
-                             sum(x, na.rm=na.rm)
-                           }
+africa_year <- stackApply( africa.m, indices=col(m), filename="data/africa_year.grd", overwrite=TRUE
+                         , fun = sum
                          )
+layerNames(africa_year) <- paste("Y", years, sep="")
 library(maptools)
 country <- readShapePoly("TM_WORLD_BORDERS-0.3/TM_WORLD_BORDERS-0.3.shp")
-rcountry <- rasterize(country, africa)
+rcountry <- rasterize(country, africa_year)
 
 # TODO extract year data per country
+cnts <- unique(values(rcountry))[-1]
+names(cnts) <- country$NAME[cnts]
+cntsCells <- t(sapply( cnts
+                   , function(i) {
+                       w <- which(rcountry[]==i)
+                       m <- extract(africa_year, w)
+                       if (is.matrix(m))
+                         colMeans(m) # TODO note that the it should be a weighted average of area
+                       else
+                         m
+                     }
+                   ))
+
+prec <- as.data.frame(cntsCells)
+write.csv(prec, file="data/prec.csv")
