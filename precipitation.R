@@ -16,10 +16,10 @@ days <- matrix( diff(seq(as.Date("1979-01-01"), as.Date("2011-01-01"), by = "mon
 # create list of files for yearmonth
 files <- paste("gpcp_", m, ".ascii.gz", sep="")
 
-DOWNLOADDATA <- FALSE
+DOWNLOADDATA <- readline("Download precipitation data from internet? (y/n) ")
 
 # download data
-if (DOWNLOADDATA){
+if (DOWNLOADDATA=="y"){
   data.url <- "ftp://rsd.gsfc.nasa.gov/pub/912/bolvin/GPCP_ASCII/"
   require(RCurl)
   dir.create("data/NASA", recursive=TRUE)
