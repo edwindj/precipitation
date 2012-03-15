@@ -77,4 +77,4 @@ cntsCells <- t(sapply( cnts
                    ))
 
 prec <- as.data.frame(cntsCells)
-write.csv(prec, file="data/prec.csv")
+write.csv(prec, file="data/prec_0.5_year.csv")
