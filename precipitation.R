@@ -85,5 +85,6 @@ write.csv(prec, file="data/prec_0.5_year.csv")
 # test plot to see if it looks ok
 plot(africa_year[[1]])
 plot(country, add=TRUE)
+
 # look yearly precipitation data
 View(prec)
