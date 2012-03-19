@@ -1,4 +1,4 @@
-nlibrary(raster)
+library(raster)
 library(sp)
 
 years <- 1979:2010
@@ -88,3 +88,10 @@ plot(country, add=TRUE)
 
 # look yearly precipitation data
 View(prec)
+names(prec) <- paste("prec.", years, sep="")
+lprec <- reshape(prec, varying=names(prec), direction="long", ids=row.names(prec), idvar="country", timevar="year")
+
+library(ggplot2)
+qplot(data=lprec, x=year, y=prec, facets=~country, geom="line", ylab="Yearly precipitation")
+
+
